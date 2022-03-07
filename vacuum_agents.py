@@ -1,18 +1,14 @@
-from vacuum import *
 
+# anna wolfe, sam flores, berto gonzalez, vic netessine
+
+from vacuum import *
 
 path = []
 ill_dir = []
-dirs = []
 dir = ""
 actions = ["north", "east", "south", "west", "clean"]
 exc_none = ["north", "east", "south", "west"]
 exc_none1 = ["south", "west", "north", "east"]
-ns = ['north', 'south']
-we = ['west', 'east']
-coords = {() : []}
-hit = 0
-x = 1
 
 
 
@@ -34,46 +30,59 @@ def state_agent_reset():
     global x
     global dir
     global path
-    global dirs
-    global hit
 
     path = []
     ill_dir = []
-    dirs = []
     dir = ""
-    hit = 0
-    x = 0
-
-def change_coord(dir, hit):
-  global coords
-  global x
-  print(coords, x)
-  if dir == "north":
-      coords[]
-      coords[] = [coords[x-1][0], coords[x-1][1] + 1, hit]
-  if dir == "south":
-      coords[x] = [coords[x-1][0], coords[x-1][1] - 1, hit]
-  if dir == "east":
-      coords[x] = [coords[x-1][0] + 1, coords[x-1][1], hit]
-  if dir == "west":
-      coords[x] = [coords[x-1][0] - 1, coords[x-1][1], hit]
-  # print(coords[-1])
-
-
 
 def state_agent(placement): # true is dirty, false is clean
 
+    global ill_dir
     global dir
-
-    if placement:
+    global path
+    l_dir = []
+    oppdir = ""
+    # print(path)
+    if placement: # cleaning
+        path.append("dirty")
         return "clean"
     else:
-        dir = random.choice(exc_none)
-        hit = 0
-        change_coord(dir, hit)
-        return dir
+        if path == ["dirty"]: # first case
+            path.append("clean")
+            dir = random.choice(exc_none)
+            return dir
+        else:
+            if path[-1] == "clean": # i've hit a boundary
+
+                # append legal dirs to legal dir list
+                if "north" not in ill_dir: l_dir.append("north")
+                if "south" not in ill_dir: l_dir.append("south")
+                if "east" not in ill_dir: l_dir.append("east")
+                if "west" not in ill_dir: l_dir.append("west")
+
+                dir = random.choice(l_dir) # choose random legal dir
+                oppdir = exc_none1[exc_none.index(dir)]
+                # make the opposite dir an illegal dir
+
+                if oppdir not in ill_dir:
+                    ill_dir.append(exc_none1[exc_none.index(dir)])
+
+                if dir == "east" or dir == "west":
+                    if "north" in ill_dir:
+                        ill_dir.remove("north")
+                    if "south" in ill_dir:
+                        ill_dir.remove("south")
+                if dir == "south" or dir == "north":
+                    if "east" in ill_dir:
+                        ill_dir.remove("east")
+                    if "west" in ill_dir:
+                        ill_dir.remove("west")
+                return dir
+            else: # im cleaning a line
+                path.append("clean")
+                return dir
 
 
 
-run(6, 50000, state_agent)
+run(20, 50000, state_agent)
 # print(many_runs(20, 50000, 10, state_agent, state_agent_reset))
